@@ -1,0 +1,7 @@
+# GPT-2 small scale. The main model for every phase.
+context_len: 1024
+n_layer: 12
+n_head: 12
+n_kv_head: 12
+d_model: 768
+d_ff: 2048

@@ -1,0 +1,7 @@
+# Laptop debugging only. ~7M params, almost all of them in the embedding table.
+context_len: 256
+n_layer: 2
+n_head: 4
+n_kv_head: 4
+d_model: 128
+d_ff: 384
