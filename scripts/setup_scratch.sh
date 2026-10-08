@@ -1,7 +1,8 @@
 #!/bin/bash
 # One-time Adroit setup: keep big outputs on scratch (100 GB) instead of home (10 GB).
 # Creates the folders on scratch and symlinks them into the repo, so code can keep
-# using relative paths like data/fineweb. Run from the repo root on the login node:
+# using relative paths like data/fineweb. Run from the repo root on the login node,
+# with the conda env active:
 #   bash scripts/setup_scratch.sh
 set -euo pipefail
 
@@ -15,3 +16,9 @@ for dir in data checkpoints runs logs wandb; do
     ln -sfn "$SCRATCH/$dir" "$dir"
     echo "$dir -> $SCRATCH/$dir"
 done
+
+# tiktoken downloads GPT-2's vocabulary on first use, which fails on compute nodes
+# (no internet). Fetch it once here, on the login node, into a cache jobs can read.
+# Needs the conda env active (module load anaconda3/... && conda activate ...).
+export TIKTOKEN_CACHE_DIR=/scratch/network/$USER/tiktoken_cache
+python -c "import tiktoken; tiktoken.get_encoding('gpt2')" && echo "tiktoken cache ready: $TIKTOKEN_CACHE_DIR"

@@ -6,13 +6,14 @@ Hand-checkable setup: max_lr = 1.0, warmup_steps = 10, max_steps = 110, min_lr_r
   after:   step > 110,   lr stays at min_lr
 """
 
+import itertools
 import math
 
 import pytest
 
 from rlhf.train.lr_schedule import lr_at_step
 
-CFG = dict(max_lr=1.0, warmup_steps=10, max_steps=110, min_lr_ratio=0.1)
+CFG = {"max_lr": 1.0, "warmup_steps": 10, "max_steps": 110, "min_lr_ratio": 0.1}
 
 
 @pytest.mark.parametrize(
@@ -38,13 +39,13 @@ def test_cosine_shape_in_decay():
 
 
 def test_warmup_rises_and_decay_falls():
-    lrs = [lr_at_step(s, **CFG) for s in range(0, 120)]
-    assert all(a < b for a, b in zip(lrs[:9], lrs[1:10]))  # strictly up during warmup
-    assert all(a >= b for a, b in zip(lrs[10:], lrs[11:]))  # never up during decay
+    lrs = [lr_at_step(s, **CFG) for s in range(120)]
+    assert all(a < b for a, b in itertools.pairwise(lrs[:10]))  # strictly up during warmup
+    assert all(a >= b for a, b in itertools.pairwise(lrs[10:]))  # never up during decay
 
 
 def test_real_pretraining_settings():
     # docs/02: peak 6e-4, warmup 700, ~9,537 steps for 5B tokens, decay to 10% of peak
-    real = dict(max_lr=6e-4, warmup_steps=700, max_steps=9537, min_lr_ratio=0.1)
+    real = {"max_lr": 6e-4, "warmup_steps": 700, "max_steps": 9537, "min_lr_ratio": 0.1}
     assert lr_at_step(699, **real) == pytest.approx(6e-4)
     assert lr_at_step(9537, **real) == pytest.approx(6e-5)

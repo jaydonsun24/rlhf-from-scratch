@@ -15,5 +15,9 @@
 module purge
 module load anaconda3/2026.7
 conda activate /scratch/network/$USER/envs/rlhf
+# Compute nodes have no internet: tiktoken must find GPT-2's vocab files in this cache
+# (filled once on the login node by setup_scratch.sh), and Hugging Face must not try to connect.
+export TIKTOKEN_CACHE_DIR=/scratch/network/$USER/tiktoken_cache
+export HF_DATASETS_OFFLINE=1 HF_HUB_OFFLINE=1
 
 python -m rlhf.data.fineweb step=tokenize num_workers=$SLURM_CPUS_PER_TASK

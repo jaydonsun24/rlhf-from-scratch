@@ -1,0 +1,30 @@
+# Pretraining (docs/02-pretraining.md). Override anything on the command line: key=value
+model: gpt124m
+data_dir: data/fineweb
+run_name: pretrain
+seed: 1337
+
+# 524,288 tokens per optimizer step = 32 sequences x 1024 tokens x 16 micro-batches (1 GPU)
+micro_batch_size: 32
+seq_len: 1024
+total_batch_tokens: 524288
+tokens: 5000000000          # 5B tokens -> 9,536 steps
+
+max_lr: 6.0e-4
+min_lr_ratio: 0.1
+warmup_steps: 700
+weight_decay: 0.1
+beta1: 0.9
+beta2: 0.95
+eps: 1.0e-8
+grad_clip: 1.0
+
+log_every: 10
+val_every: 250
+val_batches: 20
+sample_every: 1000
+ckpt_every: 500
+
+compile: true
+bf16: true
+use_wandb: true
