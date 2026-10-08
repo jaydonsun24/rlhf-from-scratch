@@ -1,11 +1,12 @@
 # Large or machine-specific outputs (never commit these).
 # The leading / means "only at the repo root": a bare `data/` would also
-# ignore the code folder src/rlhf/data/.
-/data/
-/checkpoints/
-/runs/
-/wandb/
-/logs/
+# ignore the code folder src/rlhf/data/. No trailing slash, because on Adroit
+# these are symlinks into scratch, and git treats a symlink as a file.
+/data
+/checkpoints
+/runs
+/wandb
+/logs
 *.pt
 
 # Python
