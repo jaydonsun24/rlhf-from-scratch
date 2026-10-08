@@ -19,6 +19,7 @@ sees where one document ends and the next begins. Tokens are stored as uint16
 import json
 import math
 import os
+import threading
 from dataclasses import dataclass
 from multiprocessing import Pool
 from pathlib import Path
@@ -69,7 +70,7 @@ def tokenize_doc(text: str) -> np.ndarray:
     return np.array(tokens, dtype=np.uint16)
 
 
-def iter_texts(parquet_files: list[Path]):
+def iter_texts(parquet_files: list[Path], stop: threading.Event):
     from datasets import load_dataset
 
     # streaming=True reads the files row by row instead of loading 17 GB into memory
@@ -77,6 +78,8 @@ def iter_texts(parquet_files: list[Path]):
         "parquet", data_files=[str(p) for p in parquet_files], split="train", streaming=True
     )
     for row in ds:
+        if stop.is_set():  # budget reached: finish the reader cleanly instead of abandoning it
+            return
         yield row["text"]
 
 
@@ -102,8 +105,12 @@ def tokenize(cfg: FineWebConfig) -> dict:
         print(f"  wrote {name} ({n_tokens:,} tokens)", flush=True)
         shard_index += 1
 
+    # The Pool reads texts in a background thread. When we stop early, `stop` tells that
+    # reader to finish cleanly; abandoning it mid-read crashed the interpreter on exit
+    # ("terminate called without an active exception") after all shards were written.
+    stop = threading.Event()
     with Pool(workers) as pool:
-        for doc in pool.imap(tokenize_doc, iter_texts(raw_files), chunksize=16):
+        for doc in pool.imap(tokenize_doc, iter_texts(raw_files, stop), chunksize=16):
             while len(doc) > 0 and total < target:
                 take = min(len(doc), cfg.shard_size - filled, target - total)
                 buffer[filled : filled + take] = doc[:take]
@@ -114,6 +121,7 @@ def tokenize(cfg: FineWebConfig) -> dict:
                     write_shard(filled)
                     filled = 0
             if total >= target:
+                stop.set()
                 break
     if filled > 0:
         write_shard(filled)  # final partial shard
