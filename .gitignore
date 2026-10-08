@@ -1,9 +1,11 @@
-# Large or machine-specific outputs (never commit these)
-data/
-checkpoints/
-runs/
-wandb/
-logs/
+# Large or machine-specific outputs (never commit these).
+# The leading / means "only at the repo root": a bare `data/` would also
+# ignore the code folder src/rlhf/data/.
+/data/
+/checkpoints/
+/runs/
+/wandb/
+/logs/
 *.pt
 
 # Python
