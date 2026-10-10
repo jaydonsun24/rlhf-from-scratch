@@ -23,6 +23,7 @@ from torch.nn.parallel import DistributedDataParallel as DDP
 
 from rlhf.data.shards import ShardLoader
 from rlhf.data.tokenizer import get_tokenizer
+from rlhf.eval.hellaswag import evaluate_hellaswag, load_examples
 from rlhf.model.generate import generate
 from rlhf.model.gpt import GPT
 from rlhf.train.lr_schedule import lr_at_step
@@ -76,6 +77,8 @@ class PretrainConfig:
     val_every: int = 250
     val_batches: int = 20
     sample_every: int = 1000
+    hellaswag_every: int = 1000  # also runs at the end; 0 disables
+    hellaswag_examples: int = 0  # 0 = all 10,042
     ckpt_every: int = 500
     # speed / infrastructure
     compile: bool = True
@@ -169,6 +172,23 @@ def main(cfg: PretrainConfig):
         cfg.seed,
     )
 
+    hellaswag = []
+    if cfg.hellaswag_every:
+        hellaswag = load_examples()  # fail now, not 1,000 steps in, if the data is missing
+        if cfg.hellaswag_examples:
+            hellaswag = hellaswag[: cfg.hellaswag_examples]
+
+    def run_hellaswag(at_step):
+        # The un-compiled model: HellaSwag rows have varying lengths, which would make
+        # torch.compile recompile over and over.
+        result = evaluate_hellaswag(
+            raw_model, hellaswag, device, use_bf16, dist_info.rank, dist_info.world_size
+        )
+        if dist_info.is_main:
+            print(f"step {at_step} | hellaswag {result['hellaswag_acc']:.4f}", flush=True)
+            logger.log(result, at_step)
+        return result
+
     # Resume from the latest checkpoint if there is one.
     step, train_seconds = 0, 0.0
     latest = latest_checkpoint(ckpt_dir)
@@ -240,6 +260,9 @@ def main(cfg: PretrainConfig):
                 print(f"step {step} | val_loss {val_loss:.4f}", flush=True)
                 logger.log({"val_loss": val_loss}, step)
 
+        if cfg.hellaswag_every and step % cfg.hellaswag_every == 0 and step < max_steps:
+            run_hellaswag(step)
+
         if dist_info.is_main and cfg.sample_every and step % cfg.sample_every == 0:
             write_samples(raw_model, run_dir / "samples" / f"step_{step:06d}.txt", device)
 
@@ -254,6 +277,7 @@ def main(cfg: PretrainConfig):
     # Finished.
     checkpoint(step)
     checkpoint(step, name="final.pt")
+    final_hellaswag = run_hellaswag(step) if cfg.hellaswag_every else {}
     if dist_info.is_main:
         write_samples(raw_model, run_dir / "samples" / f"step_{step:06d}.txt", device)
         gpu_hours = train_seconds * dist_info.world_size / 3600
@@ -263,6 +287,7 @@ def main(cfg: PretrainConfig):
             "tokens_trained": step * cfg.total_batch_tokens,
             "steps": step,
             "final_val_loss": val_loss,
+            **final_hellaswag,
             "tokens_per_sec": round(step * cfg.total_batch_tokens / train_seconds, 1),
             "gpu_hours": round(gpu_hours, 2),
             "hardware": hardware_info(),

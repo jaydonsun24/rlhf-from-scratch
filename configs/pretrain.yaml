@@ -23,6 +23,8 @@ log_every: 10
 val_every: 250
 val_batches: 20
 sample_every: 1000
+hellaswag_every: 1000    # also at the end
+hellaswag_examples: 0    # 0 = all 10,042
 ckpt_every: 500
 
 compile: true

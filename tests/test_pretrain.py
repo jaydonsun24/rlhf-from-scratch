@@ -43,6 +43,7 @@ def tiny_config(tmp_path, run_name):
         val_every=4,
         val_batches=2,
         sample_every=0,
+        hellaswag_every=0,
         ckpt_every=0,
         compile=False,
         use_wandb=False,
@@ -105,3 +106,25 @@ def test_logs_metrics_and_loss_goes_down(tmp_path, monkeypatch):
     assert train[-1]["loss"] < train[0]["loss"] - 2
     assert any("val_loss" in r for r in records)
     assert (tmp_path / "runs" / "logs" / "config.yaml").exists()
+
+
+def test_hellaswag_runs_during_and_after_training(tmp_path, monkeypatch):
+    import pandas as pd
+
+    fake_data(tmp_path)
+    hs = tmp_path / "data" / "raw" / "hellaswag" / "data"
+    hs.mkdir(parents=True)
+    pd.DataFrame(
+        {"ctx": ["The cat sat"] * 3, "endings": [["on", "a", "b", "c"]] * 3, "label": ["0"] * 3}
+    ).to_parquet(hs / "validation-00000-of-00001.parquet")
+    monkeypatch.chdir(tmp_path)  # HellaSwag is read from data/raw/... relative to the repo root
+    cfg = tiny_config(tmp_path, "hs")
+    cfg.hellaswag_every = 4
+    run(monkeypatch, cfg)
+    records = [
+        json.loads(line)
+        for line in (tmp_path / "runs" / "hs" / "metrics.jsonl").read_text().splitlines()
+    ]
+    hs_steps = [r["step"] for r in records if "hellaswag_acc" in r]
+    assert hs_steps == [4, 8]  # every 4 steps, and once at the end (step 8), not twice
+    assert all(r["hellaswag_n"] == 3 for r in records if "hellaswag_acc" in r)
