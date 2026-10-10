@@ -121,7 +121,7 @@ def generate(
     cache = make_kv_cache(model, P + max_new_tokens) if use_cache else None
     ids = input_ids
     position_ids = (attn.cumsum(-1) - 1).clamp(min=0)
-    logits = model(ids, position_ids, attn, cache)[:, -1]  # (B, V): predictions for the next token
+    logits = model(ids, position_ids, attn, cache, last_only=True)[:, -1]  # (B, V): next token
 
     done = torch.zeros(B, dtype=torch.bool, device=device)  # which rows have hit EOS
     tokens, response_mask, logprobs = [], [], []
@@ -142,12 +142,12 @@ def generate(
         if use_cache:
             # Feed only the new token; its position = number of real tokens before it.
             new_pos = (attn.sum(dim=-1, keepdim=True) - 1).clamp(min=0)  # (B, 1)
-            logits = model(token[:, None], new_pos, attn, cache)[:, -1]
+            logits = model(token[:, None], new_pos, attn, cache, last_only=True)[:, -1]
         else:
             # No cache: re-run the model over the entire sequence so far.
             ids = torch.cat([ids, token[:, None]], dim=1)
             position_ids = (attn.cumsum(-1) - 1).clamp(min=0)
-            logits = model(ids, position_ids, attn)[:, -1]
+            logits = model(ids, position_ids, attn, last_only=True)[:, -1]
 
     return {
         "tokens": torch.stack(tokens, dim=1),

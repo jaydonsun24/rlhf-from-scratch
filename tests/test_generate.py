@@ -79,8 +79,8 @@ class ForceEOT(torch.nn.Module):
         super().__init__()
         self.model, self.rows, self.blocks = model, rows, model.blocks
 
-    def forward(self, *args):
-        logits = self.model(*args).clone()
+    def forward(self, *args, **kwargs):
+        logits = self.model(*args, **kwargs).clone()
         logits[self.rows, :, EOT_ID] += 1e4
         return logits
 

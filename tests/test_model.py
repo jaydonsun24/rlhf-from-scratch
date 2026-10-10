@@ -44,6 +44,15 @@ def test_weight_tying():
     assert torch.allclose(model(idx), expected, atol=1e-5)
 
 
+def test_last_only_matches_full_logits():
+    model = tiny_model()
+    idx = torch.randint(0, 50257, (2, 9))
+    full = model(idx)
+    last = model(idx, last_only=True)
+    assert last.shape == (2, 1, 50304)
+    assert torch.allclose(last, full[:, -1:], atol=1e-5)
+
+
 def test_init_scales():
     model = tiny_model()
     n_layer = model.config.n_layer  # 2 for tiny

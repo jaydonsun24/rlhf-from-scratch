@@ -53,6 +53,10 @@ class GPT(nn.Module):
             x = block(x, position_ids, attention_mask, layer_cache)
         return self.norm(x)
 
-    def forward(self, idx, position_ids=None, attention_mask=None, kv_cache=None):
+    def forward(self, idx, position_ids=None, attention_mask=None, kv_cache=None, last_only=False):
         x = self.hidden_states(idx, position_ids, attention_mask, kv_cache)
+        if last_only:
+            # Generation only needs the next-token scores at the last position. Skipping the
+            # rest avoids a (B, T, 50304) logits tensor (gigabytes at PPO batch sizes).
+            x = x[:, -1:]  # (B, 1, C)
         return x @ self.tok_emb.weight.T
