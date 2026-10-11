@@ -108,3 +108,28 @@ def test_bf16_autocast_runs_on_cpu():
     opt = torch.optim.AdamW(model.parameters(), lr=1e-3)
     out = train_step(model, opt, [batch(2)], lr=1e-3, grad_clip=1.0, use_bf16=True)
     assert torch.isfinite(torch.tensor(out["loss"]))
+
+
+def test_custom_loss_fn():
+    """SFT, the reward model and DPO reuse train_step with their own loss: train_step calls
+    loss_fn(model, micro_batch) for each micro-batch instead of the default next-token loss."""
+    seen = []
+
+    def loss_fn(model, micro_batch):
+        seen.append(micro_batch["tag"])
+        return model(micro_batch["x"]).float().pow(2).mean()  # any scalar works
+
+    x1, _ = batch(2, seed=1)
+    x2, _ = batch(2, seed=2)
+    micro = [{"x": x1, "tag": "first"}, {"x": x2, "tag": "second"}]
+
+    reference = tiny_model()  # same weights: compute the expected loss before any update
+    with torch.no_grad():
+        expected = (loss_fn(reference, micro[0]) + loss_fn(reference, micro[1])) / 2
+    seen.clear()
+
+    model = tiny_model()
+    opt = torch.optim.SGD(model.parameters(), lr=0.1)
+    out = train_step(model, opt, micro, lr=0.1, grad_clip=1e9, loss_fn=loss_fn)
+    assert seen == ["first", "second"]  # called once per micro-batch, in order
+    assert abs(out["loss"] - expected.item()) < 1e-5  # averaged across micro-batches

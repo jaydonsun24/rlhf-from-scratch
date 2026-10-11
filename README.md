@@ -17,7 +17,7 @@ The post-training task is Reddit summarization, the same setup OpenAI used in [*
 
 ```
 random weights
-  -> pretraining     TBD B tokens of FineWeb-Edu
+  -> pretraining     ~5B tokens of FineWeb-Edu (4,999,610,368)
   -> SFT             116,722 Reddit posts with human-written TL;DRs
   -> reward model    92,858 human preference comparisons
   -> PPO             KL-penalized against the SFT model   (DPO trained as a baseline)
@@ -63,7 +63,7 @@ More side-by-side examples are in [`results/hacking_examples.md`](results/hackin
 
 | | Params | Tokens | Val loss | HellaSwag | Hardware | Time |
 |---|---|---|---|---|---|---|
-| This model | TBD | TBD B | TBD | TBD% | TBD | TBD h |
+| This model | 123,587,328 | 4,999,610,368 | 3.117 | 28.98% | 1× A100 80GB | 9.58 h |
 | GPT-2 small (OpenAI, for reference) | 124M | WebText | n/a | 29.6% | | |
 
 ![Pretraining loss](assets/pretrain_loss.png)
@@ -82,11 +82,11 @@ A decoder-only transformer with the components modern open models use rather tha
 
 Attention has two code paths: a hand-written one and PyTorch's fused `scaled_dot_product_attention`. A test checks they produce the same output, and training uses the fused one. Generation uses a preallocated KV cache, which matters a lot here because PPO generates hundreds of thousands of summaries. Batched generation left-pads prompts, so position ids are computed from the attention mask; a test checks that padding a prompt doesn't change its output.
 
-With the KV cache, generation runs TBD× faster than recomputing the full sequence at every step (256 new tokens, batch 64).
+With the KV cache, generation runs 7.47× faster than recomputing the full sequence at every step (10,680 vs. 1,429 tokens/s; 256 new tokens, batch 64, one A100). Both paths compute output logits for the last position only, so the comparison isolates the cache.
 
 ### Pretraining (`src/rlhf/train/pretrain.py`)
 
-TBD B tokens from FineWeb-Edu, tokenized once into `uint16` shards. AdamW with a 0.5M-token batch (via gradient accumulation), linear warmup and cosine decay, bf16 autocast, `torch.compile`, and gradient clipping. Runs as a Slurm job on Princeton's Adroit cluster. Every checkpoint stores the model, optimizer, LR schedule step, dataloader position and RNG state, so a job killed at its time limit resumes exactly where it stopped.
+~5B tokens (4,999,610,368) from FineWeb-Edu, tokenized once into `uint16` shards. AdamW with a 0.5M-token batch (via gradient accumulation), linear warmup and cosine decay, bf16 autocast, `torch.compile`, and gradient clipping. Runs as a Slurm job on Princeton's Adroit cluster. Every checkpoint stores the model, optimizer, LR schedule step, dataloader position and RNG state, so a job killed at its time limit resumes exactly where it stopped.
 
 ### Supervised fine-tuning (`src/rlhf/train/sft.py`)
 
