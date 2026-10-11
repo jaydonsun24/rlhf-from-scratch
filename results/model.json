@@ -1,0 +1,22 @@
+{
+  "model": "gpt124m",
+  "parameters": 123587328,
+  "vocab_size": 50304,
+  "context_len": 1024,
+  "n_layer": 12,
+  "n_head": 12,
+  "n_kv_head": 12,
+  "d_model": 768,
+  "d_ff": 2048,
+  "rope_theta": 10000.0,
+  "norm_eps": 1e-05,
+  "dropout": 0.0,
+  "tie_embeddings": true,
+  "git_hash": "20525ed",
+  "hardware": {
+    "gpu": "NVIDIA A100 80GB PCIe",
+    "num_gpus": 1,
+    "platform": "Linux-5.14.0-687.44.1.el9_8.x86_64-x86_64-with-glibc2.34"
+  },
+  "written_at": "2026-10-10 09:20:12"
+}

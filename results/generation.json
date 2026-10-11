@@ -1,0 +1,17 @@
+{
+  "model": "gpt124m",
+  "batch_size": 64,
+  "prompt_len": 128,
+  "new_tokens": 256,
+  "tokens_per_sec_with_cache": 10680.3,
+  "tokens_per_sec_without_cache": 1428.9,
+  "speedup": 7.47,
+  "bf16": true,
+  "git_hash": "20525ed",
+  "hardware": {
+    "gpu": "NVIDIA A100 80GB PCIe",
+    "num_gpus": 1,
+    "platform": "Linux-5.14.0-687.44.1.el9_8.x86_64-x86_64-with-glibc2.34"
+  },
+  "written_at": "2026-10-10 09:19:53"
+}
