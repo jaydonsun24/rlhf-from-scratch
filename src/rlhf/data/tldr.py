@@ -112,6 +112,10 @@ class TLDRDataset:
     def __len__(self):
         return len(self.ids)
 
+    def longest(self) -> int:
+        """Length of the longest prompt + response pair, in tokens."""
+        return int((np.diff(self.prompt_offsets) + np.diff(self.response_offsets)).max())
+
     def __getitem__(self, i):
         p = self.prompts[self.prompt_offsets[i] : self.prompt_offsets[i + 1]].tolist()
         r = self.responses[self.response_offsets[i] : self.response_offsets[i + 1]].tolist()

@@ -1,0 +1,29 @@
+# Supervised fine-tuning on Reddit TL;DR (docs/03-sft.md). Override anything: key=value
+model: gpt124m
+init_from: checkpoints/pretrain/final.pt
+data_dir: data/tldr
+run_name: sft
+seed: 1337
+
+# 128 sequences per optimizer step = 16 per micro-batch x 8 micro-batches. 1 epoch = 911 steps.
+batch_size: 128
+micro_batch_size: 16
+epochs: 1
+max_steps: 0              # > 0 overrides epochs (LR sweep: 200)
+
+lr: 3.0e-5                # sweep {1e-5, 3e-5, 1e-4}, pick by val_loss
+warmup_ratio: 0.05
+min_lr_ratio: 0.1
+weight_decay: 0.0
+eps: 1.0e-5
+grad_clip: 1.0
+
+log_every: 10
+eval_every: 100
+eval_examples: 1000
+eval_batch_size: 32
+ckpt_every: 200
+
+bf16: true
+use_wandb: true
+write_results: true
