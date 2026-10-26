@@ -1,4 +1,4 @@
-# Pretraining (docs/02-pretraining.md). Override anything on the command line: key=value
+# Pretraining. Override anything on the command line: key=value
 model: gpt124m
 data_dir: data/fineweb
 run_name: pretrain

@@ -45,7 +45,7 @@ def test_warmup_rises_and_decay_falls():
 
 
 def test_real_pretraining_settings():
-    # docs/02: peak 6e-4, warmup 700, ~9,537 steps for 5B tokens, decay to 10% of peak
+    # The real pretraining run: peak 6e-4, warmup 700, ~9,537 steps for 5B tokens, decay to 10% of peak
     real = {"max_lr": 6e-4, "warmup_steps": 700, "max_steps": 9537, "min_lr_ratio": 0.1}
     assert lr_at_step(699, **real) == pytest.approx(6e-4)
     assert lr_at_step(9537, **real) == pytest.approx(6e-5)

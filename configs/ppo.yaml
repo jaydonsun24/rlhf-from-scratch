@@ -1,4 +1,4 @@
-# PPO (docs/06-ppo.md). Override anything: key=value
+# PPO. Override anything: key=value
 model: gpt124m
 sft_checkpoint: checkpoints/sft/final.pt
 rm_checkpoint: checkpoints/rm/final.pt
@@ -36,7 +36,7 @@ scoring_batch: 32
 log_every: 1
 sample_every: 50
 ckpt_every: 10
-milestone_every: 100          # docs/07 over-optimization curve uses these
+milestone_every: 100          # the over-optimization curve uses these
 eval_examples: 1000
 kl_prompts: 200
 eval_batch_size: 32

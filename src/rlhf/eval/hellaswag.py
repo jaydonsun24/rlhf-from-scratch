@@ -1,4 +1,4 @@
-"""HellaSwag: can the model pick the sensible ending of a sentence? (docs/02-pretraining.md)
+"""HellaSwag: can the model pick the sensible ending of a sentence?
 
 Each example is a context ("A man is sitting on a roof. he") and 4 endings, one correct.
 A language model "answers" by scoring how likely each ending is: we compute the average

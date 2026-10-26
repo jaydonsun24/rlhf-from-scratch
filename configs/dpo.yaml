@@ -1,4 +1,4 @@
-# DPO baseline (docs/05-dpo.md). Override anything: key=value
+# DPO baseline. Override anything: key=value
 model: gpt124m
 init_from: checkpoints/sft/final.pt   # policy and frozen reference both start as SFT
 rm_checkpoint: checkpoints/rm/final.pt  # diagnostic RM score only

@@ -1,4 +1,4 @@
-"""Pretrain the GPT from random weights on FineWeb-Edu (docs/02-pretraining.md).
+"""Pretrain the GPT from random weights on FineWeb-Edu.
 
     # laptop smoke test
     python -m rlhf.train.pretrain --config configs/pretrain.yaml model=tiny max_steps=20 \

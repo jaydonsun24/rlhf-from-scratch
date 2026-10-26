@@ -20,3 +20,8 @@ __pycache__/
 .DS_Store
 .vscode/
 .env
+
+# Private working notes: stay on this machine, never pushed
+/CLAUDE.md
+/.claude/
+/docs/

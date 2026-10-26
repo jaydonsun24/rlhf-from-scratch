@@ -178,7 +178,6 @@ configs/    YAML configs
 scripts/    Slurm jobs, Colab notebook, labeling tool
 tests/      unit tests (run on CPU in under a minute)
 results/    final metrics as JSON/CSV (every number in this README comes from here)
-docs/       design notes for each stage
 ```
 
 ## Limitations

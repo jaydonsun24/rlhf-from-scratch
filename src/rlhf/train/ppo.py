@@ -1,5 +1,5 @@
 """PPO: optimize the SFT policy against the reward model, with a per-token KL penalty to SFT
-(docs/06-ppo.md, following Stiennon et al. 2020 and Huang et al. 2024).
+(following Stiennon et al. 2020 and Huang et al. 2024).
 
     sbatch scripts/slurm/ppo.slurm                              # beta 0.05 (the default run)
     sbatch scripts/slurm/ppo.slurm beta=0 run_name=ppo_beta0    # ablation A: no KL penalty
@@ -92,7 +92,7 @@ class PPOConfig:
     micro_batch_size: int = 16
     clip_eps: float = 0.2
     vf_coef: float = 0.1
-    lr: float = 3e-6  # docs/06 sweep {3e-6, 1e-5}
+    lr: float = 3e-6  # sweep {3e-6, 1e-5}
     value_lr: float = 0.0  # 0 = same as lr
     warmup_iterations: int = 10
     min_lr_ratio: float = 0.1
@@ -288,7 +288,7 @@ def ppo_update(policy, value_model, opt_policy, opt_value, roll, cfg, lr, use_bf
     }
     avg["ratio_max"] = float(np.max([s["ratio_max"] for s in p_stats]))
     avg.update({k: float(np.mean([s[k] for s in v_stats])) for k in ("vf_loss", "vf_clipfrac")})
-    # Sanity check (docs/06): before the first update the policy hasn't changed, so the very
+    # Sanity check: before the first update the policy hasn't changed, so the very
     # first micro-batch must have ratio ~1 and approx_kl ~0. Anything else is a logits/
     # temperature/indexing mismatch between rollout and training.
     avg["first_microbatch_approx_kl"] = p_stats[0]["approx_kl"]

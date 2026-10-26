@@ -1,4 +1,4 @@
-"""Train the reward model on human preference comparisons (docs/04-reward-model.md).
+"""Train the reward model on human preference comparisons.
 
     # Adroit: LR sweep (short runs), then the full epoch
     sbatch scripts/slurm/rm.slurm lr=3e-6 max_steps=300 run_name=rm_lr3e-6 write_results=false save_checkpoints=false
@@ -60,7 +60,7 @@ class RMConfig:
     micro_batch_size: int = 8
     epochs: int = 1
     max_steps: int = 0  # > 0 overrides epochs (LR sweep)
-    lr: float = 1e-5  # docs/04 sweep {3e-6, 1e-5, 3e-5}, pick by val accuracy
+    lr: float = 1e-5  # sweep {3e-6, 1e-5, 3e-5}, pick by val accuracy
     warmup_ratio: float = 0.05
     min_lr_ratio: float = 0.1
     weight_decay: float = 0.0

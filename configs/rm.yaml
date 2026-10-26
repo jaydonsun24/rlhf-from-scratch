@@ -1,4 +1,4 @@
-# Reward model (docs/04-reward-model.md). Override anything: key=value
+# Reward model. Override anything: key=value
 model: gpt124m
 init_from: checkpoints/sft/final.pt   # backbone starts from the SFT model
 data_dir: data/prefs

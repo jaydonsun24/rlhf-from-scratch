@@ -1,4 +1,4 @@
-"""Download FineWeb-Edu and tokenize it into uint16 shards (docs/02-pretraining.md).
+"""Download FineWeb-Edu and tokenize it into uint16 shards.
 
 Two steps, because on Adroit only the login node has internet and only compute
 nodes should do heavy work:

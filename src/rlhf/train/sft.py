@@ -1,4 +1,4 @@
-"""Supervised fine-tuning on Reddit TL;DR (docs/03-sft.md).
+"""Supervised fine-tuning on Reddit TL;DR.
 
     # laptop smoke test (the real model; the tiny one's 256-token context is too short for TL;DR)
     python -m rlhf.train.sft --config configs/sft.yaml run_name=sft_smoke max_steps=3 \
@@ -153,7 +153,7 @@ def generation_eval(model, val, indices, cfg, device, use_bf16, sample_path=None
         Path(sample_path).write_text("\n".join(lines))
     return {
         **rouge_scores(predictions, references),
-        "eot_rate": float(np.mean(stopped)),  # docs/03: should be > 0.95
+        "eot_rate": float(np.mean(stopped)),  # should be > 0.95
         "mean_length": float(np.mean(lengths)),
         "n_eval": len(indices),
     }

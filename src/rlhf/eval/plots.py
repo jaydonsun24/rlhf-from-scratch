@@ -1,4 +1,4 @@
-"""README figures, generated only from files in runs/ and results/ (docs/07-evaluation.md).
+"""README figures, generated only from files in runs/ and results/.
 
     python -m rlhf.eval.plots pretrain --metrics runs/pretrain/metrics.jsonl
 
@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 # Validated categorical palette (light mode) and neutral inks.
 SERIES = ["#2a78d6", "#eb6834"]  # blue, orange
 TEXT, MUTED, GRID, SURFACE = "#0b0b0b", "#52514e", "#e4e3df", "#fcfcfb"
-GPT2_HELLASWAG = 0.296  # OpenAI GPT-2 124M, the reference in docs/02
+GPT2_HELLASWAG = 0.296  # OpenAI GPT-2 124M, the reference to beat
 TOKENS_PER_STEP = 524_288
 
 

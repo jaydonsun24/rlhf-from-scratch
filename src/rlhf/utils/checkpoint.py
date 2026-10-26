@@ -1,4 +1,4 @@
-"""Save and resume training state. One format for every phase (docs/08-infrastructure.md).
+"""Save and resume training state. One format for every phase.
 
 A checkpoint holds everything needed to continue as if the job never stopped:
 model weights, optimizer state (Adam's running averages), the step counter

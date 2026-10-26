@@ -4,7 +4,7 @@ import torch
 def compute_gae(rewards, values, mask, gamma=1.0, lam=0.95):
     values = values * mask
     rewards = rewards * mask
-    B, R = rewards.shape
+    R = rewards.shape[1]
     next_adv = torch.zeros_like(rewards[:, 0])
     advantages = torch.zeros_like(rewards)
     for t in reversed(range(R)):

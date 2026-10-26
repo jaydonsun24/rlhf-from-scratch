@@ -1,4 +1,4 @@
-"""Stream (x, y) training batches from the tokenized FineWeb shards (docs/02-pretraining.md).
+"""Stream (x, y) training batches from the tokenized FineWeb shards.
 
 Each batch is one contiguous run of B*T + 1 tokens, cut into B rows of T:
     x = tokens[:-1]   the input

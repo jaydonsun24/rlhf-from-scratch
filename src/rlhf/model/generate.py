@@ -1,4 +1,4 @@
-"""Text generation with a KV cache (docs/01-model.md).
+"""Text generation with a KV cache.
 
 Generation is a loop: predict one token, append it, predict the next. Without a cache,
 every step re-runs the model over the whole sequence so far. With a cache, each layer

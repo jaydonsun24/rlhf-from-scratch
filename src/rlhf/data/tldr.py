@@ -1,4 +1,4 @@
-"""Reddit TL;DR data for SFT, and the batch layout every later phase reuses (docs/03-sft.md).
+"""Reddit TL;DR data for SFT, and the batch layout every later phase reuses.
 
     python -m rlhf.data.tldr        # once: tokenizes data/raw/tldr/*.jsonl -> data/tldr/
 
@@ -156,7 +156,7 @@ def prepare(raw_dir: str = RAW_DIR, out_dir: str = OUT_DIR, seed: int = 0) -> di
         meta["splits"][split] = {"raw": len(rows), "kept": len(ids), "dropped_over_cap": dropped}
         print(f"{split}: kept {len(ids):,} of {len(rows):,}", flush=True)
 
-    # Fixed, seeded eval subsets (docs/03: 1,000 val ids; docs/07: 500 test ids).
+    # Fixed, seeded eval subsets (1,000 val ids; 500 test ids).
     rng = np.random.default_rng(seed)
     for split, n, name in (("valid", 1000, "val_subset.json"), ("test", 500, "test_subset.json")):
         all_ids = list(np.load(out / f"{split}.npz")["ids"])

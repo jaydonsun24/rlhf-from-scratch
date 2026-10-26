@@ -2,9 +2,9 @@
 
     python scripts/download_raw.py
 
-  data/raw/tldr/       SFT posts + human summaries (train/valid/test.jsonl)      docs/03
-  data/raw/prefs/      human preference comparisons (parquet)                    docs/04
-  data/raw/hellaswag/  HellaSwag validation set (parquet)                        docs/02
+  data/raw/tldr/       SFT posts + human summaries (train/valid/test.jsonl)
+  data/raw/prefs/      human preference comparisons (parquet)
+  data/raw/hellaswag/  HellaSwag validation set (parquet)
 
 Each phase's own data script (tldr.py, preferences.py, eval/hellaswag.py) reads these
 local files, so nothing on a compute node ever needs the internet.

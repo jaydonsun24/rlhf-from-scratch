@@ -1,4 +1,4 @@
-"""Human preference comparisons for the reward model (docs/04-reward-model.md).
+"""Human preference comparisons for the reward model.
 
     python -m rlhf.data.preferences      # once: data/raw/prefs/*.parquet -> data/prefs/
 

@@ -90,7 +90,7 @@ def metrics(tmp_path, run_name):
 
 
 def test_sanity_checks_at_the_start(tmp_path, monkeypatch):
-    """docs/06: at iteration 1 the policy IS the reference (KL 0), and before the first
+    """At iteration 1 the policy IS the reference (KL 0), and before the first
     update the policy hasn't changed (ratio 1, approx_kl 0)."""
     fake_tldr(tmp_path)
     run(monkeypatch, tiny_config(tmp_path, "sane"))

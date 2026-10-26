@@ -1,4 +1,4 @@
-"""Model hyperparameters. Presets live in configs/model/*.yaml (see docs/01-model.md)."""
+"""Model hyperparameters. Presets live in configs/model/*.yaml."""
 
 from dataclasses import dataclass
 

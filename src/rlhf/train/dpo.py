@@ -1,4 +1,4 @@
-"""DPO baseline (docs/05-dpo.md): train the SFT model directly on the human comparisons.
+"""DPO baseline: train the SFT model directly on the human comparisons.
 
     sbatch scripts/slurm/dpo.slurm lr=1e-6 max_steps=300 run_name=dpo_lr1e-6 write_results=false save_checkpoints=false
     sbatch scripts/slurm/dpo.slurm lr=<best>
@@ -72,7 +72,7 @@ class DPOConfig:
     micro_batch_size: int = 8
     epochs: int = 1
     max_steps: int = 0  # > 0 overrides epochs (LR sweep)
-    lr: float = 3e-6  # docs/05: sweep 1e-6 .. 5e-6
+    lr: float = 3e-6  # sweep 1e-6 .. 5e-6
     warmup_ratio: float = 0.1
     min_lr_ratio: float = 0.1
     weight_decay: float = 0.0

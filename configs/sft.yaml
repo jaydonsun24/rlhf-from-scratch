@@ -1,4 +1,4 @@
-# Supervised fine-tuning on Reddit TL;DR (docs/03-sft.md). Override anything: key=value
+# Supervised fine-tuning on Reddit TL;DR. Override anything: key=value
 model: gpt124m
 init_from: checkpoints/pretrain/final.pt
 data_dir: data/tldr

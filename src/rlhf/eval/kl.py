@@ -1,4 +1,4 @@
-"""How far has a fine-tuned policy drifted from the SFT model? (docs/07-evaluation.md)
+"""How far has a fine-tuned policy drifted from the SFT model?
 
 KL(policy || reference) on a set of prompts, estimated by Monte Carlo:
   1. sample a summary from the policy (temperature T, the same as PPO's rollouts),
