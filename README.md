@@ -11,7 +11,7 @@ Before making the repo public:
 
 ![tests](https://github.com/jaydonsun24/rlhf-from-scratch/actions/workflows/tests.yml/badge.svg)
 
-A 124M-parameter language model that I wrote, pretrained from random weights, and then aligned with RLHF, all in plain PyTorch. It doesn't use Hugging Face's `transformers` or `trl` libraries. Attention, the KV cache, the reward model, PPO and DPO are all implemented in this repo, and each piece has tests.
+A 124M-parameter language model that I wrote, pretrained from random weights, and then aligned with RLHF, all in Torch. It doesn't use Hugging Face's `transformers` or `trl` libraries. Attention, the KV cache, the reward model, PPO and DPO are all implemented in this repo, and each piece has tests.
 
 The post-training task is Reddit summarization, the same setup OpenAI used in [*Learning to summarize from human feedback*](https://arxiv.org/abs/2009.01325) (Stiennon et al., 2020). The model learns to write TL;DRs from about 117K human-written examples, a reward model learns what people prefer from 92,858 human comparisons (91,801 after dropping pairs with summaries over 80 tokens), and PPO trains the model to score well on that reward model without drifting too far from where it started.
 
