@@ -5,7 +5,7 @@
         batch_size=8 micro_batch_size=4 eval_every=0 eval_examples=16 eval_batch_size=8 \
         use_wandb=false write_results=false
     # Adroit: LR sweep (3 short runs), then the full epoch
-    sbatch scripts/slurm/sft.slurm lr=1e-5 max_steps=200 run_name=sft_lr1e-5 write_results=false
+    sbatch scripts/slurm/sft.slurm lr=1e-5 max_steps=200 run_name=sft_lr1e-5 write_results=false save_checkpoints=false
     sbatch scripts/slurm/sft.slurm lr=<best>
 
 Starts from the pretrained model and keeps training it on (post, summary) pairs, grading
@@ -35,6 +35,7 @@ from rlhf.train.lr_schedule import lr_at_step
 from rlhf.train.step import train_step
 from rlhf.utils.checkpoint import (
     PreemptionFlag,
+    delete_rolling_checkpoints,
     latest_checkpoint,
     load_checkpoint,
     restore,
@@ -75,6 +76,9 @@ class SFTConfig:
     bf16: bool = True
     use_wandb: bool = True
     write_results: bool = True  # sweep runs turn this off; only the final run writes results/
+    save_checkpoints: bool = (
+        True  # sweep runs: false (their numbers are in runs/<name>/summary.json)
+    )
 
 
 def sft_batch_loss(model, batch):
@@ -210,6 +214,8 @@ def main(cfg: SFTConfig):
     logger = MetricsLogger(run_dir, cfg.run_name, "sft", asdict(cfg), cfg.use_wandb)
 
     def checkpoint(name=None):
+        if not cfg.save_checkpoints:
+            return
         save_checkpoint(
             ckpt_dir,
             step=step,
@@ -280,6 +286,7 @@ def main(cfg: SFTConfig):
     print(summary)
     if cfg.write_results:
         write_results("sft", summary)
+    delete_rolling_checkpoints(ckpt_dir)  # finished: keep final.pt (and PPO milestones) only
     logger.finish()
 
 

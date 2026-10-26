@@ -1,7 +1,7 @@
 #!/bin/bash
 # DPO; any GPU works. Extra key=value arguments
 # override the config, e.g. an LR-sweep run:
-#   sbatch scripts/slurm/dpo.slurm lr=3e-6 max_steps=300 run_name=dpo_lr3e-6 eval_examples=200 kl_prompts=50 write_results=false
+#   sbatch scripts/slurm/dpo.slurm lr=3e-6 max_steps=300 run_name=dpo_lr3e-6 eval_examples=200 kl_prompts=50 write_results=false save_checkpoints=false
 # Resubmitting with the same arguments resumes from the latest checkpoint.
 #SBATCH --job-name=dpo
 #SBATCH --nodes=1

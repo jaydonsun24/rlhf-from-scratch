@@ -1,7 +1,7 @@
 #!/bin/bash
 # Reward model training; any GPU works (a MIG slice is plenty). Extra key=value arguments
 # override the config, e.g. an LR-sweep run:
-#   sbatch scripts/slurm/rm.slurm lr=1e-5 max_steps=300 run_name=rm_lr1e-5 final_eval_pairs=5000 write_results=false
+#   sbatch scripts/slurm/rm.slurm lr=1e-5 max_steps=300 run_name=rm_lr1e-5 final_eval_pairs=5000 write_results=false save_checkpoints=false
 # Resubmitting with the same arguments resumes from the latest checkpoint.
 #SBATCH --job-name=rm
 #SBATCH --nodes=1

@@ -31,3 +31,4 @@ length_samples: 1000
 bf16: true
 use_wandb: true
 write_results: true
+save_checkpoints: true    # sweep runs: false (keeps scratch under quota)

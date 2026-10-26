@@ -1,7 +1,7 @@
 #!/bin/bash
 # SFT on one MIG slice (20 GB is plenty for 124M fine-tuning). Extra key=value arguments
 # override the config, e.g. an LR-sweep run:
-#   sbatch scripts/slurm/sft.slurm lr=1e-5 max_steps=200 run_name=sft_lr1e-5 write_results=false
+#   sbatch scripts/slurm/sft.slurm lr=1e-5 max_steps=200 run_name=sft_lr1e-5 write_results=false save_checkpoints=false
 # Resubmitting with the same arguments resumes from the latest checkpoint.
 #SBATCH --job-name=sft
 #SBATCH --nodes=1

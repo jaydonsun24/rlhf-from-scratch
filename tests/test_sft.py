@@ -118,3 +118,13 @@ def test_starts_from_the_pretrained_checkpoint(tmp_path):
         loaded.state_dict().items(), pretrained.state_dict().values(), strict=True
     ):
         assert torch.equal(p, q), name
+
+
+def test_sweep_runs_save_no_checkpoints_and_finished_runs_drop_rolling_ones(tmp_path, monkeypatch):
+    fake_tldr(tmp_path)
+    run(monkeypatch, tiny_config(tmp_path, "sweep", save_checkpoints=False))
+    assert not (tmp_path / "checkpoints" / "sweep").exists()
+    assert (tmp_path / "runs" / "sweep" / "summary.json").exists()  # the numbers survive
+    run(monkeypatch, tiny_config(tmp_path, "full", ckpt_every=2))
+    names = sorted(p.name for p in (tmp_path / "checkpoints" / "full").glob("*.pt"))
+    assert names == ["final.pt"]  # rolling ckpt_*.pt deleted once the run finished

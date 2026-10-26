@@ -1,6 +1,6 @@
 """DPO baseline (docs/05-dpo.md): train the SFT model directly on the human comparisons.
 
-    sbatch scripts/slurm/dpo.slurm lr=1e-6 max_steps=300 run_name=dpo_lr1e-6 write_results=false
+    sbatch scripts/slurm/dpo.slurm lr=1e-6 max_steps=300 run_name=dpo_lr1e-6 write_results=false save_checkpoints=false
     sbatch scripts/slurm/dpo.slurm lr=<best>
 
 Two models: the policy (trained, starts as SFT) and the reference (a frozen copy of SFT).
@@ -44,6 +44,7 @@ from rlhf.train.sft import generation_eval
 from rlhf.train.step import train_step
 from rlhf.utils.checkpoint import (
     PreemptionFlag,
+    delete_rolling_checkpoints,
     latest_checkpoint,
     load_checkpoint,
     restore,
@@ -87,6 +88,9 @@ class DPOConfig:
     bf16: bool = True
     use_wandb: bool = True
     write_results: bool = True
+    save_checkpoints: bool = (
+        True  # sweep runs: false (their numbers are in runs/<name>/summary.json)
+    )
 
 
 def to_device(batch, device):
@@ -200,6 +204,8 @@ def main(cfg: DPOConfig):
     logger = MetricsLogger(run_dir, cfg.run_name, "dpo", asdict(cfg), cfg.use_wandb)
 
     def checkpoint(name=None):
+        if not cfg.save_checkpoints:
+            return
         save_checkpoint(
             ckpt_dir,
             step=step,
@@ -327,6 +333,7 @@ def main(cfg: DPOConfig):
     print(summary)
     if cfg.write_results:
         write_results("dpo", summary)
+    delete_rolling_checkpoints(ckpt_dir)  # finished: keep final.pt (and PPO milestones) only
     logger.finish()
 
 

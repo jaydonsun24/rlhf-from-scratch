@@ -49,9 +49,11 @@ def get_rng_state() -> dict:
 def set_rng_state(state: dict) -> None:
     random.setstate(state["python"])
     np.random.set_state(state["numpy"])
-    torch.set_rng_state(state["torch"])
+    # RNG states must be CPU byte tensors. Checkpoints are loaded with map_location=<gpu>,
+    # which moves EVERY tensor in them to the GPU, these included, so move them back.
+    torch.set_rng_state(state["torch"].cpu())
     if "cuda" in state and torch.cuda.is_available():
-        torch.cuda.set_rng_state_all(state["cuda"])
+        torch.cuda.set_rng_state_all([s.cpu() for s in state["cuda"]])
 
 
 def _optimizer_state(optimizer):
@@ -98,6 +100,14 @@ def save_checkpoint(
 
     prune_checkpoints(run_dir, keep_last)
     return path
+
+
+def delete_rolling_checkpoints(run_dir: Path) -> None:
+    """Once a run has finished and written its results, the rolling ckpt_*.pt files (which only
+    exist to resume a killed job) are dead weight: ~1.5-3 GB each against a 100 GB quota.
+    Milestones and final.pt are kept."""
+    for path in Path(run_dir).glob("ckpt_*.pt"):
+        path.unlink()
 
 
 def prune_checkpoints(run_dir: Path, keep_last: int) -> None:

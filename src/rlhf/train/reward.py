@@ -1,7 +1,7 @@
 """Train the reward model on human preference comparisons (docs/04-reward-model.md).
 
     # Adroit: LR sweep (short runs), then the full epoch
-    sbatch scripts/slurm/rm.slurm lr=3e-6 max_steps=300 run_name=rm_lr3e-6 write_results=false
+    sbatch scripts/slurm/rm.slurm lr=3e-6 max_steps=300 run_name=rm_lr3e-6 write_results=false save_checkpoints=false
     sbatch scripts/slurm/rm.slurm lr=<best>
 
 Starts from the SFT model (backbone) plus a fresh scalar head, and trains with the
@@ -33,6 +33,7 @@ from rlhf.train.lr_schedule import lr_at_step
 from rlhf.train.step import train_step
 from rlhf.utils.checkpoint import (
     PreemptionFlag,
+    delete_rolling_checkpoints,
     latest_checkpoint,
     load_checkpoint,
     restore,
@@ -76,6 +77,9 @@ class RMConfig:
     bf16: bool = True
     use_wandb: bool = True
     write_results: bool = True
+    save_checkpoints: bool = (
+        True  # sweep runs: false (their numbers are in runs/<name>/summary.json)
+    )
 
 
 def rm_batch_loss(model, batch):
@@ -179,6 +183,8 @@ def main(cfg: RMConfig):
     logger = MetricsLogger(run_dir, cfg.run_name, "rm", asdict(cfg), cfg.use_wandb)
 
     def checkpoint(name=None, extra=None):
+        if not cfg.save_checkpoints:
+            return
         save_checkpoint(
             ckpt_dir,
             step=step,
@@ -321,6 +327,7 @@ def main(cfg: RMConfig):
     print(summary)
     if cfg.write_results:
         write_results("reward_model", summary)
+    delete_rolling_checkpoints(ckpt_dir)  # finished: keep final.pt (and PPO milestones) only
     logger.finish()
 
 

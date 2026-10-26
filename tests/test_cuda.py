@@ -52,3 +52,17 @@ def test_bf16_autocast_forward_and_backward():
     loss.backward()
     assert torch.isfinite(loss)
     assert all(torch.isfinite(p.grad).all() for p in model.parameters() if p.grad is not None)
+
+
+def test_resume_on_gpu_restores_rng_state(tmp_path):
+    """Checkpoints are loaded with map_location=<gpu>, which moves the saved RNG states to
+    the GPU too; restoring must still work (this crashed the first real resumed run)."""
+    from rlhf.utils.checkpoint import latest_checkpoint, load_checkpoint, restore, save_checkpoint
+
+    model = tiny_on_gpu()
+    opt = torch.optim.AdamW(model.parameters(), lr=1e-3)
+    save_checkpoint(tmp_path, step=7, model=model, optimizer=opt, config={}, phase="test")
+    expected = torch.rand(3)  # the next random numbers after saving
+    state = load_checkpoint(latest_checkpoint(tmp_path), map_location=torch.device("cuda"))
+    assert restore(state, tiny_on_gpu(), torch.optim.AdamW(model.parameters(), lr=1e-3)) == 7
+    assert torch.equal(torch.rand(3), expected)  # RNG continues exactly where it was saved
