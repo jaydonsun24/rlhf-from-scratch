@@ -1,0 +1,35 @@
+# DPO baseline (docs/05-dpo.md). Override anything: key=value
+model: gpt124m
+init_from: checkpoints/sft/final.pt   # policy and frozen reference both start as SFT
+rm_checkpoint: checkpoints/rm/final.pt  # diagnostic RM score only
+data_dir: data/prefs
+tldr_dir: data/tldr
+run_name: dpo
+seed: 1337
+
+beta: 0.1
+# 64 comparisons (= 128 sequences) per optimizer step; 1 epoch = 1,434 steps.
+# micro_batch_size 4: DPO keeps full-vocabulary log-probs for policy and reference, so it
+# needs more memory per sequence than SFT or the RM; 4 fits comfortably on a 20 GB MIG slice.
+batch_size: 64
+micro_batch_size: 4
+epochs: 1
+max_steps: 0             # > 0 overrides epochs (LR sweep: 300)
+
+lr: 3.0e-6               # sweep {1e-6, 3e-6, 5e-6}, pick by held-out preference accuracy
+warmup_ratio: 0.1
+min_lr_ratio: 0.1
+weight_decay: 0.0
+eps: 1.0e-5
+grad_clip: 1.0
+
+log_every: 10
+eval_every: 200
+eval_batch_size: 16
+ckpt_every: 200
+eval_examples: 1000      # sweep runs: 200
+kl_prompts: 200          # sweep runs: 50
+
+bf16: true
+use_wandb: true
+write_results: true

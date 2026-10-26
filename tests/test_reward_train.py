@@ -10,6 +10,8 @@ from rlhf.data import preferences, tldr
 from rlhf.train import reward
 from rlhf.utils.checkpoint import load_checkpoint
 
+pytestmark = pytest.mark.slow  # end-to-end runs: skipped by CI's `-m "not slow"`
+
 
 def fake_data(tmp_path):
     raw = tmp_path / "raw_tldr"

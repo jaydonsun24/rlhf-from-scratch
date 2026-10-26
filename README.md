@@ -13,7 +13,7 @@ Before making the repo public:
 
 A 124M-parameter language model that I wrote, pretrained from random weights, and then aligned with RLHF, all in plain PyTorch. It doesn't use Hugging Face's `transformers` or `trl` libraries. Attention, the KV cache, the reward model, PPO and DPO are all implemented in this repo, and each piece has tests.
 
-The post-training task is Reddit summarization, the same setup OpenAI used in [*Learning to summarize from human feedback*](https://arxiv.org/abs/2009.01325) (Stiennon et al., 2020). The model learns to write TL;DRs from about 117K human-written examples, a reward model learns what people prefer from 92,858 human comparisons, and PPO trains the model to score well on that reward model without drifting too far from where it started.
+The post-training task is Reddit summarization, the same setup OpenAI used in [*Learning to summarize from human feedback*](https://arxiv.org/abs/2009.01325) (Stiennon et al., 2020). The model learns to write TL;DRs from about 117K human-written examples, a reward model learns what people prefer from 92,858 human comparisons (91,801 after dropping pairs with summaries over 80 tokens), and PPO trains the model to score well on that reward model without drifting too far from where it started.
 
 ```
 random weights
@@ -70,9 +70,9 @@ More side-by-side examples are in [`results/hacking_examples.md`](results/hackin
 
 ### Reward model
 
-- Accuracy on TBD held-out human comparisons: **TBD%** (Huang et al. report 62.8% to 68.9% for 1B to 6.9B models on the same data).
-- Accuracy rises with the labeler's stated confidence: TBD% on low-confidence pairs vs. TBD% on high-confidence pairs.
-- Correlation between reward and summary length on SFT samples: Spearman ρ = TBD. <!-- FILL: one sentence on whether this predicted PPO's length behavior. -->
+- Accuracy on 83,675 held-out human comparisons: **60.78%** (Huang et al. report 62.8% to 68.9% for 1B to 6.9B models on the same data).
+- Accuracy rises with the labeler's stated confidence: 54.60% on pairs the labeler was least sure about vs. 65.87% on pairs they were most sure about.
+- Correlation between reward and summary length on 1,000 SFT samples: Spearman ρ = 0.068. <!-- FILL: one sentence on whether this predicted PPO's length behavior. -->
 
 ## How it works
 

@@ -83,3 +83,60 @@ def test_gradient_only_reaches_positions_that_predict_response_tokens():
         False,
         False,
     ]  # positions 1, 2 predict 2, 3
+
+
+# ---------- dpo_loss ----------
+# dpo_loss(policy_chosen, policy_rejected, ref_chosen, ref_rejected, beta) -> scalar
+# All four inputs are (B,) summed log-probs of whole summaries (from sequence_logprobs).
+#   logratio = log pi(y|x) - log pi_ref(y|x)   for chosen and rejected
+#   loss = -logsigmoid(beta * (logratio_chosen - logratio_rejected)), averaged over the batch
+
+from rlhf.rl.losses import dpo_loss
+
+
+def test_dpo_policy_equal_to_reference_is_ln2():
+    lp = torch.tensor([-20.0, -35.5, -12.0])
+    other = torch.tensor([-25.0, -30.0, -40.0])
+    assert torch.allclose(dpo_loss(lp, other, lp, other, beta=0.1), torch.tensor(LN2))
+
+
+def test_dpo_hand_computed():
+    # policy raised chosen by 10 nats over the reference, left rejected unchanged:
+    # beta * (10 - 0) = 0.1 * 10 = 1.0  ->  loss = -log sigmoid(1) = 0.3133
+    loss = dpo_loss(
+        torch.tensor([-10.0]),
+        torch.tensor([-30.0]),
+        torch.tensor([-20.0]),
+        torch.tensor([-30.0]),
+        beta=0.1,
+    )
+    assert torch.allclose(loss, torch.tensor(-math.log(1 / (1 + math.exp(-1)))))
+
+
+def test_dpo_only_relative_changes_matter():
+    args = [
+        torch.tensor([-10.0, -5.0]),
+        torch.tensor([-30.0, -6.0]),
+        torch.tensor([-20.0, -4.0]),
+        torch.tensor([-25.0, -7.0]),
+    ]
+    shifted = [a + 100.0 for a in args]  # same differences
+    assert torch.allclose(dpo_loss(*args, beta=0.5), dpo_loss(*shifted, beta=0.5))
+
+
+def test_dpo_gradient_raises_chosen_lowers_rejected():
+    pc = torch.tensor([-20.0], requires_grad=True)
+    pr = torch.tensor([-25.0], requires_grad=True)
+    dpo_loss(pc, pr, torch.tensor([-20.0]), torch.tensor([-25.0]), beta=0.1).backward()
+    assert pc.grad.item() < 0 < pr.grad.item()
+
+
+def test_dpo_is_stable_for_huge_margins():
+    loss = dpo_loss(
+        torch.tensor([-5000.0]),
+        torch.tensor([0.0]),
+        torch.tensor([0.0]),
+        torch.tensor([0.0]),
+        beta=1.0,
+    )
+    assert torch.isfinite(loss)
