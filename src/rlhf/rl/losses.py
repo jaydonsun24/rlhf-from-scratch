@@ -10,3 +10,7 @@ def sft_loss(logits, input_ids, response_mask):
     losses = nn.functional.cross_entropy(logits, input_ids, reduction="none") * response_mask
     avg_loss = losses.sum() / response_mask.sum()
     return avg_loss
+
+
+def bradley_terry_loss(chosen_rewards, rejected_rewards):
+    return -nn.functional.logsigmoid(chosen_rewards - rejected_rewards).mean()

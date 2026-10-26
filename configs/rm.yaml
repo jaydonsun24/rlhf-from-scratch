@@ -1,0 +1,33 @@
+# Reward model (docs/04-reward-model.md). Override anything: key=value
+model: gpt124m
+init_from: checkpoints/sft/final.pt   # backbone starts from the SFT model
+data_dir: data/prefs
+tldr_dir: data/tldr
+run_name: rm
+seed: 1337
+
+# 64 comparisons (= 128 sequences) per optimizer step; 1 epoch = 1,434 steps
+batch_size: 64
+micro_batch_size: 8
+epochs: 1
+max_steps: 0             # > 0 overrides epochs (LR sweep: 300)
+
+lr: 1.0e-5               # sweep {3e-6, 1e-5, 3e-5}, pick by held-out accuracy
+warmup_ratio: 0.05
+min_lr_ratio: 0.1
+weight_decay: 0.0
+eps: 1.0e-5
+grad_clip: 1.0
+
+log_every: 10
+eval_every: 200
+eval_batch_size: 32
+ckpt_every: 200
+
+final_eval_pairs: 0      # 0 = all ~84K held-out comparisons (sweep runs: 5000)
+norm_examples: 5000
+length_samples: 1000
+
+bf16: true
+use_wandb: true
+write_results: true
