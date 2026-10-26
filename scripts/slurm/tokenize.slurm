@@ -15,6 +15,7 @@
 module purge
 module load anaconda3/2026.7
 conda activate /scratch/network/$USER/envs/rlhf
+export PYTHONUNBUFFERED=1           # print() lines appear in the log immediately, in order
 # Compute nodes have no internet: tiktoken must find GPT-2's vocab files in this cache
 # (filled once on the login node by setup_scratch.sh), and Hugging Face must not try to connect.
 export TIKTOKEN_CACHE_DIR=/scratch/network/$USER/tiktoken_cache

@@ -16,6 +16,7 @@
 module purge
 module load anaconda3/2026.7
 conda activate /scratch/network/$USER/envs/rlhf
+export PYTHONUNBUFFERED=1           # print() lines appear in the log immediately, in order
 export TIKTOKEN_CACHE_DIR=/scratch/network/$USER/tiktoken_cache
 export HF_DATASETS_OFFLINE=1 HF_HUB_OFFLINE=1
 

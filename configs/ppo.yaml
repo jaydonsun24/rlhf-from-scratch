@@ -1,0 +1,47 @@
+# PPO (docs/06-ppo.md). Override anything: key=value
+model: gpt124m
+sft_checkpoint: checkpoints/sft/final.pt
+rm_checkpoint: checkpoints/rm/final.pt
+tldr_dir: data/tldr
+run_name: ppo_default         # results/<run_name>.json
+seed: 1337
+
+# rollouts: 250k episodes / 512 per iteration = 488 iterations
+rollout_batch: 512
+total_episodes: 250000
+max_iterations: 0             # > 0 overrides (debug run: 20)
+temperature: 0.7
+eos_trick: true               # ablation B: false
+eos_penalty: -1.0
+
+beta: 0.05                    # ablation A: 0, 0.01, 0.05, 0.2
+gamma: 1.0
+lam: 0.95
+whiten_advantages: true       # ablation D: false
+
+ppo_epochs: 4
+minibatch_size: 128
+micro_batch_size: 16
+clip_eps: 0.2
+vf_coef: 0.1
+lr: 3.0e-6                    # sweep {3e-6, 1e-5}
+value_lr: 0.0                 # 0 = same as lr
+warmup_iterations: 10
+min_lr_ratio: 0.1
+eps: 1.0e-5
+grad_clip: 1.0
+value_init: rm                # ablation C: sft
+
+scoring_batch: 32
+log_every: 1
+sample_every: 50
+ckpt_every: 10
+milestone_every: 100          # docs/07 over-optimization curve uses these
+eval_examples: 1000
+kl_prompts: 200
+eval_batch_size: 32
+
+bf16: true
+use_wandb: true
+write_results: true
+save_checkpoints: true    # sweep runs: false (keeps scratch under quota)
