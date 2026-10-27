@@ -24,7 +24,7 @@ minibatch_size: 128
 micro_batch_size: 16
 clip_eps: 0.2
 vf_coef: 0.1
-lr: 3.0e-6                    # sweep {3e-6, 1e-5}
+lr: 1.0e-5                    # sweep {3e-6, 1e-5}: 1e-5 was healthy (clipfrac ~0.09), picked
 value_lr: 0.0                 # 0 = same as lr
 warmup_iterations: 10
 min_lr_ratio: 0.1
