@@ -148,7 +148,7 @@ def parse_args(argv=None):
     p.add_argument("--out-dir", default="runs/eval/summaries")
     p.add_argument("--n", type=int, default=500, help="test posts (from test_subset.json)")
     p.add_argument("--kl-prompts", type=int, default=200)
-    p.add_argument("--eval-batch-size", type=int, default=32)
+    p.add_argument("--eval-batch-size", type=int, default=16)  # 32 hits OOM on a 20 GB MIG slice
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--overwrite", action="store_true")
     return p.parse_args(argv)
