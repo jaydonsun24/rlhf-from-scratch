@@ -17,6 +17,7 @@ from rlhf.eval.judge import (
     parse_preference,
     run_prompts,
 )
+from rlhf.utils.config import load_config
 
 # ---------- parsing ----------
 
@@ -104,12 +105,18 @@ def cfg_for(tmp_path, **kw):
         "summaries_dir": str(tmp_path / "summaries"),
         "out_dir": str(tmp_path / "judge"),
         "cache_path": str(tmp_path / "cache.jsonl"),
-        "yes": True,
+        "skip_confirm": True,
         "write_results": False,
         "workers": 2,
         "bootstrap_resamples": 200,
     }
     return JudgeConfig(**{**base, **kw})
+
+
+def test_real_config_loads():
+    # YAML reads bare yes/no/on/off as booleans, so a key like `yes:` breaks loading
+    cfg = load_config(JudgeConfig, ["--config", "configs/judge.yaml", "a=ppo"])
+    assert cfg.a == "ppo" and cfg.b == "reference" and cfg.skip_confirm is False
 
 
 def test_cache_means_never_paying_twice(tmp_path):

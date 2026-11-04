@@ -14,7 +14,7 @@ out_dir: runs/eval/judge
 cache_path: data/judge_cache.jsonl
 max_calls: 2500               # safety cap on NEW (uncached) API calls per run
 workers: 8                    # parallel requests
-yes: false                    # true = skip the cost confirmation
+skip_confirm: false                 # true = skip the cost confirmation
 write_results: true           # results/judge_<a>_vs_<b>.json
 
 bootstrap_resamples: 10000

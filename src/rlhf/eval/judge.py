@@ -57,7 +57,7 @@ class JudgeConfig:
     cache_path: str = "data/judge_cache.jsonl"
     max_calls: int = 2500
     workers: int = 8
-    yes: bool = False
+    skip_confirm: bool = False
     write_results: bool = True
     price_in_per_mtok: float = 4.0  # USD, Claude Opus 5.5; only used for the cost estimate
     price_out_per_mtok: float = 20.0
@@ -180,7 +180,7 @@ def run_prompts(prompts: list[str], cfg: JudgeConfig, cache: JudgeCache, client=
             )
         if client is None:
             client = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY from the environment
-        if not cfg.yes:
+        if not cfg.skip_confirm:
             confirm_cost(client, cfg, [p for _, p in todo])
 
         def work(item):
