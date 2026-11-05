@@ -30,7 +30,7 @@ All numbers are on the same 500 held-out Reddit posts from the TL;DR test split,
 | PPO (β = 0.01) | 4.90 | 168.50 | 44.7 | 0.128 |
 | PPO, no KL penalty (β = 0) | 6.04 | 474.37 | 53.0 | 0.033 |
 
-Neither score column proves that a summary is better. The reward-model score is what PPO is trained to push up, and ROUGE-L only measures word overlap with the human TL;DR. I built an independent check (an LLM judge plus blind hand labels, described under [Evaluation](#evaluation-srcrlhfeval)), but I haven't run it, so this README doesn't claim that one model's summaries are better than another's.
+Neither score column proves that a summary is better. The reward-model score is what PPO is trained to push up, and ROUGE-L only measures word overlap with the human TL;DR. I built an independent check (an LLM judge plus blind hand labels, described under [Evaluation](#evaluation-srcrlhfeval)), but I haven't run it.
 
 ### Reward hacking
 
