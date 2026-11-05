@@ -14,7 +14,7 @@ random weights
   -> PPO             KL-penalized against the SFT model   (DPO trained as a baseline)
 ```
 
-I built this to understand how post-training actually works, at a scale where I could run every stage myself on a university GPU cluster.
+The goal is to understand post-training
 
 ## Results
 
