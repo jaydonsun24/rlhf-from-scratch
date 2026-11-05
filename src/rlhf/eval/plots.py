@@ -136,12 +136,11 @@ def plot_overopt(csv_path="results/overopt.csv", out_path="assets/overoptimizati
     curve = read_curve(csv_path)
     judged = any(r["judge_win_rate"] for rows in curve.values() for r in rows)
 
-    fig, axes = plt.subplots(1, 2 if judged else 1, figsize=(10 if judged else 6, 3.8))
+    fig, (ax_rm, ax_quality) = plt.subplots(1, 2, figsize=(10, 3.8))
     fig.set_facecolor(SURFACE)
-    ax_rm = axes[0] if judged else axes
     xlabel = "√KL from SFT (KL in nats per summary)"
 
-    def draw(ax, key, scale=1.0):
+    def draw(ax, key, scale=1.0, falling=False):
         for color, (beta, rows) in zip(SERIES, curve.items(), strict=False):
             kept = [r for r in rows if r[key]]
             x = [float(r["sqrt_kl"]) for r in kept]
@@ -162,9 +161,9 @@ def plot_overopt(csv_path="results/overopt.csv", out_path="assets/overoptimizati
             ax.annotate(
                 label,
                 (x[-1], y[-1]),
-                xytext=(-7, 4),
+                xytext=(8, -3) if falling else (-7, 4),  # on the side away from the line
                 textcoords="offset points",
-                ha="right",
+                ha="left" if falling else "right",
                 fontsize=8,
                 color=TEXT,
             )
@@ -172,22 +171,29 @@ def plot_overopt(csv_path="results/overopt.csv", out_path="assets/overoptimizati
         ax.annotate(
             "SFT",
             (float(start["sqrt_kl"]), scale * float(start[key])),
-            xytext=(7, -3),
+            xytext=(0, 7) if falling else (7, -3),
             textcoords="offset points",
+            ha="center" if falling else "left",
             fontsize=8,
             color=MUTED,
         )
-        ax.legend(frameon=False, fontsize=8, labelcolor=MUTED, loc="upper left")
+        ax.legend(
+            frameon=False,
+            fontsize=8,
+            labelcolor=MUTED,
+            loc="lower left" if falling else "upper left",
+        )
+        if falling:
+            ax.margins(x=0.12)  # room for the label after the last point
 
     draw(ax_rm, "rm_score")
     style(ax_rm, "Reward-model score (what PPO optimizes)", xlabel, "mean score, 500 posts")
 
     if judged:
-        ax_judge = axes[1]
-        draw(ax_judge, "judge_win_rate", scale=100)
+        draw(ax_quality, "judge_win_rate", scale=100, falling=True)
         for color, rows in zip(SERIES, curve.values(), strict=False):
             kept = [r for r in rows if r["judge_win_rate"]]
-            ax_judge.vlines(
+            ax_quality.vlines(
                 [float(r["sqrt_kl"]) for r in kept],
                 [100 * float(r["judge_ci_low"]) for r in kept],
                 [100 * float(r["judge_ci_high"]) for r in kept],
@@ -195,8 +201,12 @@ def plot_overopt(csv_path="results/overopt.csv", out_path="assets/overoptimizati
                 linewidth=1,
                 alpha=0.5,
             )
-        ax_judge.axhline(50, color=MUTED, linewidth=1, linestyle="--")
-        style(ax_judge, "Judge win rate vs. human TL;DR", xlabel, "win rate (%), 95% bootstrap CI")
+        ax_quality.axhline(50, color=MUTED, linewidth=1, linestyle="--")
+        title, ylabel = "Judge win rate vs. human TL;DR", "win rate (%), 95% bootstrap CI"
+    else:  # no judge results yet: word overlap with the human TL;DRs is the independent signal
+        draw(ax_quality, "rougeL", falling=True)
+        title, ylabel = "Word overlap with human TL;DRs (ROUGE-L)", "mean ROUGE-L, 500 posts"
+    style(ax_quality, title, xlabel, ylabel)
 
     fig.tight_layout()
     Path(out_path).parent.mkdir(parents=True, exist_ok=True)

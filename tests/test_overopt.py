@@ -15,6 +15,8 @@ from rlhf.eval.overopt import (
     write_csv,
 )
 from rlhf.eval.plots import plot_overopt, read_curve
+from rlhf.eval.summary import COLUMNS as SUMMARY_COLUMNS
+from rlhf.eval.summary import POLICIES, summary_rows
 
 
 def test_curve_points_cover_every_run_from_sft_to_final():
@@ -136,3 +138,17 @@ def test_gallery_copies_summaries_and_counts_distinct(tmp_path):
     assert f"a \\| b {k}" in text  # a pipe would break the markdown table
     assert f"**1 distinct summaries across {n} posts**" in text
     assert text.count("\n## ") == len(ROWS)
+
+
+def test_summary_rows_copy_metrics_and_count_distinct(tmp_path):
+    summaries = tmp_path / "summaries"
+    for _, name, _ in POLICIES:
+        write_summaries(tmp_path, name, ["same", "same", "other"], ["a", "b", "c"])
+        meta = {k: 0.5 for k in SUMMARY_COLUMNS[3:10]}
+        meta.update(n=3, rm_score_reference=0.02)
+        (summaries / f"{name}.meta.json").write_text(json.dumps(meta))
+    rows = summary_rows(summaries)
+    assert [r["model"] for r in rows[:2]] == ["Human TL;DR", "SFT"]
+    assert rows[0]["rm_score"] == 0.02 and rows[0]["distinct_summaries"] == 3
+    assert rows[1]["distinct_summaries"] == 2 and rows[1]["rougeL"] == 0.5
+    assert len(rows) == len(POLICIES) + 1
