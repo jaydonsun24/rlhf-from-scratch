@@ -1,11 +1,13 @@
 """README figures, generated only from files in runs/ and results/.
 
     python -m rlhf.eval.plots pretrain --metrics runs/pretrain/metrics.jsonl
+    python -m rlhf.eval.plots overopt --csv results/overopt.csv
 
 Plain matplotlib: thin lines, labeled axes with units, a recessive grid, light surface.
 """
 
 import argparse
+import csv
 import json
 from pathlib import Path
 
@@ -15,7 +17,7 @@ matplotlib.use("Agg")  # write files without needing a display (works on the clu
 import matplotlib.pyplot as plt
 
 # Validated categorical palette (light mode) and neutral inks.
-SERIES = ["#2a78d6", "#eb6834"]  # blue, orange
+SERIES = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100"]  # blue, orange, aqua, yellow
 TEXT, MUTED, GRID, SURFACE = "#0b0b0b", "#52514e", "#e4e3df", "#fcfcfb"
 GPT2_HELLASWAG = 0.296  # OpenAI GPT-2 124M, the reference to beat
 TOKENS_PER_STEP = 524_288
@@ -120,12 +122,100 @@ def plot_pretrain(
     return out_path
 
 
+def read_curve(path) -> dict[float, list[dict]]:
+    """results/overopt.csv as {beta: rows in training order}. Blank judge columns stay ''."""
+    with open(path, newline="") as f:
+        rows = list(csv.DictReader(f))
+    curve = {}
+    for row in rows:
+        curve.setdefault(float(row["beta"]), []).append(row)
+    return {beta: sorted(curve[beta], key=lambda r: int(r["iteration"])) for beta in sorted(curve)}
+
+
+def plot_overopt(csv_path="results/overopt.csv", out_path="assets/overoptimization.png"):
+    curve = read_curve(csv_path)
+    judged = any(r["judge_win_rate"] for rows in curve.values() for r in rows)
+
+    fig, axes = plt.subplots(1, 2 if judged else 1, figsize=(10 if judged else 6, 3.8))
+    fig.set_facecolor(SURFACE)
+    ax_rm = axes[0] if judged else axes
+    xlabel = "√KL from SFT (KL in nats per summary)"
+
+    def draw(ax, key, scale=1.0):
+        for color, (beta, rows) in zip(SERIES, curve.items(), strict=False):
+            kept = [r for r in rows if r[key]]
+            x = [float(r["sqrt_kl"]) for r in kept]
+            y = [scale * float(r[key]) for r in kept]
+            label = f"β = {beta:g}"
+            ax.plot(
+                x,
+                y,
+                color=color,
+                linewidth=2.0,
+                marker="o",
+                markersize=5,
+                markeredgecolor=SURFACE,
+                markeredgewidth=0.8,
+                label=label,
+            )
+            # The lighter hues are hard to tell apart alone, so every line is also labeled.
+            ax.annotate(
+                label,
+                (x[-1], y[-1]),
+                xytext=(-7, 4),
+                textcoords="offset points",
+                ha="right",
+                fontsize=8,
+                color=TEXT,
+            )
+        start = next(iter(curve.values()))[0]
+        ax.annotate(
+            "SFT",
+            (float(start["sqrt_kl"]), scale * float(start[key])),
+            xytext=(7, -3),
+            textcoords="offset points",
+            fontsize=8,
+            color=MUTED,
+        )
+        ax.legend(frameon=False, fontsize=8, labelcolor=MUTED, loc="upper left")
+
+    draw(ax_rm, "rm_score")
+    style(ax_rm, "Reward-model score (what PPO optimizes)", xlabel, "mean score, 500 posts")
+
+    if judged:
+        ax_judge = axes[1]
+        draw(ax_judge, "judge_win_rate", scale=100)
+        for color, rows in zip(SERIES, curve.values(), strict=False):
+            kept = [r for r in rows if r["judge_win_rate"]]
+            ax_judge.vlines(
+                [float(r["sqrt_kl"]) for r in kept],
+                [100 * float(r["judge_ci_low"]) for r in kept],
+                [100 * float(r["judge_ci_high"]) for r in kept],
+                color=color,
+                linewidth=1,
+                alpha=0.5,
+            )
+        ax_judge.axhline(50, color=MUTED, linewidth=1, linestyle="--")
+        style(ax_judge, "Judge win rate vs. human TL;DR", xlabel, "win rate (%), 95% bootstrap CI")
+
+    fig.tight_layout()
+    Path(out_path).parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out_path, dpi=160, facecolor=SURFACE)
+    plt.close(fig)
+    return out_path
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Make README figures")
     sub = parser.add_subparsers(dest="figure", required=True)
     p = sub.add_parser("pretrain")
     p.add_argument("--metrics", default="runs/pretrain/metrics.jsonl")
     p.add_argument("--out", default="assets/pretrain_loss.png")
+    p = sub.add_parser("overopt")
+    p.add_argument("--csv", default="results/overopt.csv")
+    p.add_argument("--out", default="assets/overoptimization.png")
     args = parser.parse_args()
     if args.figure == "pretrain":
         print("wrote", plot_pretrain(args.metrics, args.out))
+    elif args.figure == "overopt":
+        print("wrote", plot_overopt(args.csv, args.out))
