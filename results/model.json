@@ -12,7 +12,7 @@
   "norm_eps": 1e-05,
   "dropout": 0.0,
   "tie_embeddings": true,
-  "git_hash": "20525ed",
+  "git_hash": "d5d9f86",
   "hardware": {
     "gpu": "NVIDIA A100 80GB PCIe",
     "num_gpus": 1,

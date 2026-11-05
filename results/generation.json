@@ -7,7 +7,7 @@
   "tokens_per_sec_without_cache": 1428.9,
   "speedup": 7.47,
   "bf16": true,
-  "git_hash": "20525ed",
+  "git_hash": "d5d9f86",
   "hardware": {
     "gpu": "NVIDIA A100 80GB PCIe",
     "num_gpus": 1,

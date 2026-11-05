@@ -45,6 +45,6 @@
     "use_wandb": true,
     "write_results": true
   },
-  "git_hash": "20525ed",
+  "git_hash": "d5d9f86",
   "written_at": "2026-10-10 19:06:52"
 }
